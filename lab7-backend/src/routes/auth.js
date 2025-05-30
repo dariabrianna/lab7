@@ -8,7 +8,7 @@ require("dotenv").config();
       "permissions": ["READ","WRITE"]
     }
 */
-router.post("/token", (req, res) => {
+router.post("/", (req, res) => {
   const { role, permissions = [] } = req.body;
   const token = jwt.sign(
     { role, permissions },

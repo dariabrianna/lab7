@@ -15,13 +15,35 @@ router.get("/", auth(["READ"]), paginate, async (req, res) => {
 });
 
 // POST /cards
+// POST /cards
 router.post("/", auth(["WRITE"]), async (req, res) => {
-  const { boardId, title } = req.body;
-  const card = await prisma.card.create({
-    data: { title, boardId },
+    // 🔍 Afișează corpul requestului primit
+    console.log("BODY primit:", req.body);
+  
+    const { boardId, title } = req.body;
+  
+    try {
+      const board = await prisma.board.findUnique({
+        where: { id: boardId },
+      });
+  
+      if (!board) {
+        return res.status(400).json({ error: "Board does not exist." });
+      }
+  
+      const card = await prisma.card.create({
+        data: { title, boardId },
+      });
+  
+      console.log("Card creat:", card); // opțional
+      res.status(201).json(card);
+    } catch (err) {
+      console.error("Eroare la crearea cardului:", err);
+      res.status(500).json({ error: "Internal server error" });
+    }
   });
-  res.status(201).json(card);
-});
+  
+  
 
 // PATCH /cards/:id
 router.patch("/:id", auth(["WRITE"]), async (req, res) => {
