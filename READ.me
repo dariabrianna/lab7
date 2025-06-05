@@ -1,0 +1,444 @@
+# React Trello Clone - Backend API
+
+RESTful API backend for the React Trello Clone application. This Express.js server provides endpoints for managing boards, cards, tasks, and user authentication with persistent data storage.
+
+## 🚀 Features
+
+- **RESTful API Design**: Clean and intuitive API endpoints
+- **Authentication System**: JWT-based user authentication
+- **CRUD Operations**: Full Create, Read, Update, Delete functionality for all resources
+- **Data Persistence**: Saves all changes to database
+- **CORS Support**: Cross-origin resource sharing for frontend integration
+- **API Documentation**: Interactive Swagger UI documentation
+- **Error Handling**: Comprehensive error responses and validation
+- **Environment Configuration**: Flexible configuration via environment variables
+
+## 🛠️ Technologies Used
+
+- **Node.js** - Runtime environment
+- **Express.js** - Web framework
+- **JWT** - JSON Web Tokens for authentication
+- **CORS** - Cross-origin resource sharing
+- **Swagger** - API documentation
+- **dotenv** - Environment variable management
+- **Database** - (MongoDB/PostgreSQL/MySQL - specify your choice)
+
+## 📦 Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/yourusername/react-trello-clone-api.git
+   cd react-trello-clone-api
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Set up environment variables**
+   Create a `.env` file in the root directory:
+   ```env
+   PORT=4000
+   JWT_SECRET=your_super_secret_jwt_key_here
+   DB_CONNECTION_STRING=your_database_connection_string
+   NODE_ENV=development
+   ```
+
+4. **Set up database**
+   ```bash
+   # Run database migrations (if applicable)
+   npm run migrate
+   
+   # Seed initial data (optional)
+   npm run seed
+   ```
+
+5. **Start the development server**
+   ```bash
+   npm start
+   # or for development with auto-reload
+   npm run dev
+   ```
+
+6. **Verify installation**
+   Navigate to `http://localhost:4000` to see the API status
+   Visit `http://localhost:4000/api-docs` for Swagger documentation
+
+## 🔗 API Endpoints
+
+### Authentication
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| POST | `/token` | Login and get JWT token | No |
+| POST | `/token/refresh` | Refresh JWT token | Yes |
+
+### Boards Management
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| GET | `/boards` | Get all boards for user | Yes |
+| POST | `/boards` | Create new board | Yes |
+| GET | `/boards/:id` | Get specific board | Yes |
+| PUT | `/boards/:id` | Update board details | Yes |
+| DELETE | `/boards/:id` | Delete board | Yes |
+
+### Cards Management
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| GET | `/cards` | Get all cards for a board | Yes |
+| POST | `/cards` | Create new card | Yes |
+| GET | `/cards/:id` | Get specific card | Yes |
+| PUT | `/cards/:id` | Update card details | Yes |
+| DELETE | `/cards/:id` | Delete card | Yes |
+| PATCH | `/cards/:id/move` | Move card between columns | Yes |
+
+### Tasks Management
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| GET | `/tasks` | Get all tasks for a card | Yes |
+| POST | `/tasks` | Create new task | Yes |
+| GET | `/tasks/:id` | Get specific task | Yes |
+| PUT | `/tasks/:id` | Update task details | Yes |
+| DELETE | `/tasks/:id` | Delete task | Yes |
+| PATCH | `/tasks/:id/complete` | Mark task as complete | Yes |
+
+## 📋 Request/Response Examples
+
+### Create a New Card
+```bash
+POST /cards
+Content-Type: application/json
+Authorization: Bearer your_jwt_token
+
+{
+  "title": "New Feature Development",
+  "description": "Implement user authentication system",
+  "boardId": "board_123",
+  "columnId": "todo",
+  "position": 0
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "card_456",
+    "title": "New Feature Development",
+    "description": "Implement user authentication system",
+    "boardId": "board_123",
+    "columnId": "todo",
+    "position": 0,
+    "createdAt": "2025-06-05T10:30:00Z",
+    "updatedAt": "2025-06-05T10:30:00Z"
+  }
+}
+```
+
+### Update Card Position
+```bash
+PATCH /cards/card_456/move
+Content-Type: application/json
+Authorization: Bearer your_jwt_token
+
+{
+  "columnId": "inprogress",
+  "position": 1
+}
+```
+
+## 🗃️ Database Schema
+
+### Users Table
+```sql
+users {
+  id: String (Primary Key)
+  email: String (Unique)
+  password: String (Hashed)
+  name: String
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+```
+
+### Boards Table
+```sql
+boards {
+  id: String (Primary Key)
+  title: String
+  description: String
+  userId: String (Foreign Key)
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+```
+
+### Cards Table
+```sql
+cards {
+  id: String (Primary Key)
+  title: String
+  description: Text
+  boardId: String (Foreign Key)
+  columnId: String (todo, inprogress, done)
+  position: Integer
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+```
+
+### Tasks Table
+```sql
+tasks {
+  id: String (Primary Key)
+  title: String
+  description: Text
+  cardId: String (Foreign Key)
+  completed: Boolean
+  position: Integer
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+```
+
+## 🔐 Authentication
+
+This API uses JWT (JSON Web Tokens) for authentication. 
+
+### Getting a Token
+```bash
+POST /token
+Content-Type: application/json
+
+{
+  "email": "user@example.com",
+  "password": "your_password"
+}
+```
+
+### Using the Token
+Include the JWT token in the Authorization header for protected routes:
+```bash
+Authorization: Bearer your_jwt_token_here
+```
+
+## 📁 Project Structure
+
+```
+react-trello-clone-api/
+├── src/
+│   ├── routes/
+│   │   ├── auth.js          # Authentication routes
+│   │   ├── boards.js        # Board management routes
+│   │   ├── cards.js         # Card management routes
+│   │   └── tasks.js         # Task management routes
+│   ├── middleware/
+│   │   ├── auth.js          # JWT authentication middleware
+│   │   ├── validation.js    # Request validation middleware
+│   │   └── errorHandler.js  # Global error handling
+│   ├── models/
+│   │   ├── User.js          # User data model
+│   │   ├── Board.js         # Board data model
+│   │   ├── Card.js          # Card data model
+│   │   └── Task.js          # Task data model
+│   ├── controllers/
+│   │   ├── authController.js
+│   │   ├── boardController.js
+│   │   ├── cardController.js
+│   │   └── taskController.js
+│   ├── utils/
+│   │   ├── database.js      # Database connection
+│   │   ├── jwt.js           # JWT utilities
+│   │   └── validators.js    # Input validation
+│   └── swagger.js           # Swagger configuration
+├── .env                     # Environment variables
+├── .env.example            # Environment variables template
+├── package.json
+└── index.js                # Server entry point
+```
+
+## 🔧 Development
+
+### Available Scripts
+
+- `npm start` - Start the production server
+- `npm run dev` - Start development server with auto-reload
+- `npm test` - Run test suite
+- `npm run lint` - Run ESLint
+- `npm run migrate` - Run database migrations
+- `npm run seed` - Seed database with sample data
+
+### Environment Variables
+
+Create a `.env` file with the following variables:
+
+```env
+# Server Configuration
+PORT=4000
+NODE_ENV=development
+
+# Database Configuration
+DB_CONNECTION_STRING=your_database_url_here
+DB_NAME=trello_clone
+
+# JWT Configuration
+JWT_SECRET=your_super_secret_jwt_key_minimum_32_characters
+JWT_EXPIRES_IN=7d
+
+# CORS Configuration
+FRONTEND_URL=http://localhost:3000
+```
+
+## 🚀 Frontend Integration
+
+This API is designed to work with the React Trello Clone frontend. To connect them:
+
+1. **Start the backend server** (this API) on port 4000
+2. **Start the React frontend** on port 3000
+3. **Configure the frontend** to make requests to `http://localhost:4000`
+
+### Frontend API Client Example
+```javascript
+// src/utils/api.js
+const API_BASE_URL = 'http://localhost:4000';
+
+const apiClient = {
+  // Get all cards for a board
+  getCards: async (boardId) => {
+    const response = await fetch(`${API_BASE_URL}/cards?boardId=${boardId}`, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    });
+    return response.json();
+  },
+
+  // Create a new card
+  createCard: async (cardData) => {
+    const response = await fetch(`${API_BASE_URL}/cards`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      },
+      body: JSON.stringify(cardData)
+    });
+    return response.json();
+  }
+};
+```
+
+## 🧪 Testing
+
+### Running Tests
+```bash
+# Run all tests
+npm test
+
+# Run tests with coverage
+npm run test:coverage
+
+# Run tests in watch mode
+npm run test:watch
+```
+
+### API Testing with cURL
+```bash
+# Login and get token
+curl -X POST http://localhost:4000/token \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@example.com","password":"password123"}'
+
+# Create a new card
+curl -X POST http://localhost:4000/cards \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{"title":"Test Card","description":"Test Description","boardId":"board_123","columnId":"todo"}'
+```
+
+## 🔄 Data Flow
+
+1. **Frontend Request**: React app sends HTTP request to API
+2. **Authentication**: JWT token verified (if required)
+3. **Validation**: Request data validated
+4. **Processing**: Business logic executed
+5. **Database**: Data saved/retrieved from database
+6. **Response**: JSON response sent back to frontend
+7. **Frontend Update**: React app updates UI with new data
+
+## 🛡️ Security Features
+
+- **JWT Authentication**: Secure token-based authentication
+- **Password Hashing**: Bcrypt for secure password storage
+- **Input Validation**: Comprehensive request validation
+- **CORS Protection**: Configured for specific origins
+- **Rate Limiting**: Protection against abuse (recommended to add)
+- **SQL Injection Prevention**: Parameterized queries
+
+## 🐛 Error Handling
+
+The API returns consistent error responses:
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Card title is required",
+    "details": {
+      "field": "title",
+      "value": "",
+      "constraint": "required"
+    }
+  }
+}
+```
+
+## 🚀 Deployment
+
+### Production Setup
+1. Set `NODE_ENV=production` in environment variables
+2. Use a production database
+3. Set strong JWT secret
+4. Enable HTTPS
+5. Configure proper CORS origins
+6. Set up monitoring and logging
+
+### Docker Deployment
+```dockerfile
+FROM node:18-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+COPY . .
+EXPOSE 4000
+CMD ["npm", "start"]
+```
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/new-endpoint`)
+3. Follow the existing code style and patterns
+4. Add tests for new functionality
+5. Update documentation
+6. Commit your changes (`git commit -am 'Add new endpoint'`)
+7. Push to the branch (`git push origin feature/new-endpoint`)
+8. Create a Pull Request
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 📞 Support
+
+If you encounter any issues:
+1. Check the [Issues](https://github.com/yourusername/react-trello-clone-api/issues) page
+2. Review the API documentation at `/api-docs`
+3. Create a new issue with detailed information
+4. Contact the maintainer at your.email@example.com
+
+---
+
+**Happy Coding!** �
